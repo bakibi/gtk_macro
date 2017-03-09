@@ -7,7 +7,7 @@ int main(int argc,char **args)
 {
 	
    
-
+    printf("hello wolrd ");
 
 
 	return 0;
