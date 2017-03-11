@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
+#include <gtk-2.0/gtk/gtkentry.h>
+#include <gtk-2.0/gtk/gtkcombobox.h>
+#include <gtk-2.0/gtk/gtkwidget.h>
 #include "macro.h"
 
 
@@ -165,7 +168,7 @@ void creer_fenetre(Fenetre *win)
   //sinon ça sera les coordonées saisies par l'utilisateur
     gtk_window_move(GTK_WINDOW(win->idFenetre), win->wPos.x, win->wPos.y);
   //modification de la couleur de fond
-  gtk_widget_modify_bg(win->idFenetre, GTK_STATE_NORMAL,&(win->wBg));
+  gtk_widget_override_background_color(win->idFenetre, GTK_STATE_NORMAL,&(win->wBg));
   //association de l'icone à la fenêtre
   if(win->icone)
     gtk_window_set_icon_from_file(GTK_WINDOW(win->idFenetre),
@@ -192,12 +195,12 @@ void creer_fenetre(Fenetre *win)
   }//Fin if(win->wBarredefilement==1)
   else if (win->wConteneur == VBOX)
   {
-    win->wBox=gtk_vbox_new(FALSE,0);
+    win->wBox=gtk_box_new(FALSE,0);
     gtk_container_add(GTK_CONTAINER(win->idFenetre),win->wBox);
   }
   else if (win->wConteneur == HBOX)
   {
-    win->wBox=gtk_hbox_new(TRUE,0);
+    win->wBox=gtk_box_new(TRUE,0);
     gtk_container_add(GTK_CONTAINER(win->idFenetre),win->wBox);
   }
   else
@@ -276,7 +279,7 @@ void creer_onglet(Onglet *onglet)
                                        TRUE
                                      );
     //couleur
-    gtk_widget_modify_bg(onglet->idNotebook, GTK_STATE_NORMAL,
+    gtk_widget_override_background_color(onglet->idNotebook, GTK_STATE_NORMAL,
                          &(onglet->oColor)
                          );
 }//Fin de la fonction creer_onglet
@@ -677,14 +680,16 @@ Description:
 void creer_entry(ZoneSaisi *zone)
 {
     //création de la zone de saisie, avec la taille max en paramètre
-    zone->idZone=gtk_entry_new_with_max_length(zone->zMaxlenght);
+    zone->idZone=gtk_entry_new();
+    gtk_entry_set_max_length(GTK_ENTRY(zone->idZone),zone->zMaxlenght);
     //texte présent initialement dans la zone
     if(zone->zText)
        gtk_entry_set_text(GTK_ENTRY(zone->idZone),zone->zText);
     //Fin if(zone->zText)
 
     //position curseur
-    gtk_entry_set_position (GTK_ENTRY(zone->idZone),zone->zCursorposition);
+    gtk_entry_set_cursor_hadjustment  (GTK_ENTRY(zone->idZone),zone->zCursorposition);
+    
     //taille de la zone
     gtk_widget_set_size_request(GTK_WIDGET(zone->idZone),zone->zTaille.w,zone->zTaille.h);
     //si le texte saisi doit être affiché ou pas
@@ -945,7 +950,7 @@ Description:
 */
 void creer_combo_box(ComboBox *comboBox)
 {
-   comboBox->idComboBox=gtk_combo_box_new_text();
+   comboBox->idComboBox=gtk_combo_box_text_new();
 }//Fin de la fonction creer_combo_box
 
 /***                FONCTION AJOUTER ELEMENT COMBO BOX                ***/
@@ -964,7 +969,7 @@ Description:
 */
 void ajouter_element_combo_box(ComboBox *comboBox,char *element)
 {
-  gtk_combo_box_append_text(GTK_COMBO_BOX(comboBox->idComboBox),element);
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX(comboBox->idComboBox),element);
 }//Fin de la fonction ajouter_element_combo_box
 
 
@@ -1062,7 +1067,9 @@ Description:
 */
 void cacher_tout (GtkWidget* wid)
 {
-    gtk_widget_hide_all(wid);
+    
+    gtk_widget_hide(wid);
+   
 }//fin de la fonction cacher_tout
 /***                        FONCTION CACHER                           ***/
 /*
