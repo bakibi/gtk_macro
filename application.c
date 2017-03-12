@@ -196,8 +196,9 @@ void creation_FenetreInscription(FenetreInscription *fen)
  
  
  */
-void reset_FenetreInscription(GtkWidget *bt,FenetreInscription *fen)
+void reset_FenetreInscription(GtkWidget *bt,Fenetre_win *feni)
 {
+    FenetreInscription *fen = feni->Finsc;
     
     gtk_entry_set_text(GTK_ENTRY(fen->i_add1->idZone),"");
     gtk_entry_set_text(GTK_ENTRY(fen->i_add2->idZone),"");
@@ -210,9 +211,127 @@ void reset_FenetreInscription(GtkWidget *bt,FenetreInscription *fen)
     
     
     
+}//fin de la fonction
+
+
+
+
+
+/*
+ Cette fonction permet d'afficher une boite de dialog affichant un message
+ ENTREES : FENetre contenant les infos de la fenetre parents
+           str   le message a afficher
+ SORTIES : NONE
+ */
+void afficher_boite_dialog_avec_message(Fenetre_win *fen,char *str)
+{
+     Dialog dial;
+    GtkWidget *content;
+    dial.dLabel = (char *)malloc(sizeof(char)*30);
+        strcpy(dial.dLabel,str);
+        //boite_dialogue(&dial,gtk_widget_get_parent_window(bt));
+        GtkDialogFlags flags = GTK_DIALOG_MODAL ;
+        dial.idDialog =  gtk_dialog_new_with_buttons ("Erreur d'inscription",
+                                      fen->Fen->idFenetre,
+                                      flags,
+                                      ("_Cancel"),
+                                      GTK_RESPONSE_CANCEL,
+                                      NULL);
+         g_signal_connect_swapped (dial.idDialog,
+                           "response",
+                           G_CALLBACK (gtk_widget_destroy),
+                           dial.idDialog);
+         content = gtk_dialog_get_content_area (GTK_DIALOG (dial.idDialog));
+         GtkWidget *label = gtk_label_new (str);
+          gtk_container_add (GTK_CONTAINER (content), label);
+          gtk_widget_show_all(dial.idDialog);
 }
 
+/*
+ Cette fonction creer un nouveu utilisateur
+ 
+ */
+Utilisateur *creer_utilisateur(char *nom,char *prenom,char *email,char *mdp,char *username,char *adresse)
+{
+    Utilisateur *ut = (Utilisateur *)malloc(sizeof(Utilisateur));
+    strcpy(ut->adresse,adresse);
+    strcpy(ut->email,email);
+    strcpy(ut->mdp,mdp);
+    strcpy(ut->nom,nom);
+    strcpy(ut->prenom,prenom);
+    strcpy(ut->username,username);
+    
+    return (Utilisateur *) ut;
+}//fin de la fonction
 
+
+
+/*
+ Fonction qui ajout un utilisateur au liste
+ */
+L_Utilisateur *ajouter_liste_utilisateur(L_Utilisateur *LU,Utilisateur user)
+{
+    if(!LU)
+    {
+        L_Utilisateur *nv = (L_Utilisateur *)malloc(sizeof(L_Utilisateur));
+        nv->suivant = NULL;
+        strcpy(nv->user.adresse,user.adresse);
+        strcpy(nv->user.email,user.email);
+        strcpy(nv->user.mdp,user.mdp);
+        strcpy(nv->user.nom,user.nom);
+        strcpy(nv->user.prenom,user.prenom);
+        strcpy(nv->user.username,user.username);
+        
+        return nv;
+        
+    }
+    L_Utilisateur *p = LU;
+    
+    while(p->suivant)
+        p = p->suivant;
+    
+    L_Utilisateur *nv = (L_Utilisateur *)malloc(sizeof(L_Utilisateur));
+        nv->suivant = NULL;
+        strcpy(nv->user.adresse,user.adresse);
+        strcpy(nv->user.email,user.email);
+        strcpy(nv->user.mdp,user.mdp);
+        strcpy(nv->user.nom,user.nom);
+        strcpy(nv->user.prenom,user.prenom);
+        strcpy(nv->user.username,user.username);
+        
+        p->suivant = nv;
+        
+        return LU;
+    
+    
+}//fin de la fonction
+
+
+/*
+ Cette fonction verifie si un utilisateur est dans la liste des utilisateur
+ Sorties : 
+   0   : le username n'existe pas dans la liste
+   1   : le username existe dans la liste$
+   2   : le mdp est correct
+ */
+int  existe_utilisateur(L_Utilisateur *LU,char *username,char *mdp)
+{
+    L_Utilisateur *p;
+    
+    while(p)
+    {
+        if(strcmp(p->user.username,username)==0)
+        {
+            if(strcmp(p->user.mdp,mdp)==0)
+            {
+                return 2;
+            }
+            return 1;
+        }
+        p = p->suivant;
+    }
+    return 0;
+}
 
 
 
@@ -224,9 +343,10 @@ void reset_FenetreInscription(GtkWidget *bt,FenetreInscription *fen)
  
  
  */
-void valider_FenetreInscription(GtkWidget *bt,FenetreInscription *fen)
+void valider_FenetreInscription(GtkWidget *bt,Fenetre_win *feni)
 {
     char nom[20],prenom[20],adresse[100],email[30],username[20],mdp1[20],mdp2[20];
+    FenetreInscription *fen = feni->Finsc;
     
     strcpy(adresse,gtk_entry_get_text(GTK_ENTRY(fen->i_add1->idZone)));
     strcat(adresse," ");
@@ -240,30 +360,26 @@ void valider_FenetreInscription(GtkWidget *bt,FenetreInscription *fen)
     
     Dialog dial;
     GtkWidget *content;
+    
+    if(strcmp(email,"")!=0 && strcmp(username,"")!=0 && strcmp(mdp1,"")!=0  && strcmp(mdp2,"")!=0 )
+    {
     if(strcmp(mdp1,mdp2)==0)
     {
-        gtk_main_quit();
+        Utilisateur *u = creer_utilisateur(nom,prenom,email,mdp1,username,adresse);
+        if(existe_utilisateur(feni->lu,u->username,u->mdp)==0)
+        {
+            feni->lu = ajouter_liste_utilisateur(feni->lu,*u);
+            afficher_boite_dialog_avec_message(feni,"Bien ajouter");
+        }
     }
     else {
         
-        dial.dLabel = (char *)malloc(sizeof(char)*20);
-        strcpy(dial.dLabel,"Erreur ! les mots de passe ne sont pas les meme !");
-        //boite_dialogue(&dial,gtk_widget_get_parent_window(bt));
-        GtkDialogFlags flags = GTK_DIALOG_MODAL ;
-        dial.idDialog =  gtk_dialog_new_with_buttons ("Erreur d'inscription",
-                                      gtk_widget_get_parent(bt),
-                                      flags,
-                                      ("_Cancel"),
-                                      GTK_RESPONSE_CANCEL,
-                                      NULL);
-         g_signal_connect_swapped (dial.idDialog,
-                           "response",
-                           G_CALLBACK (gtk_widget_destroy),
-                           dial.idDialog);
-         content = gtk_dialog_get_content_area (GTK_DIALOG (dial.idDialog));
-         GtkWidget *label = gtk_label_new (" Les 2 mdp ne sont pas identiques");
-          gtk_container_add (GTK_CONTAINER (content), label);
-          gtk_widget_show_all(dial.idDialog);
+        afficher_boite_dialog_avec_message(feni,"Les 2 mots de passes ne sont pas identiques !");
+    }
+    }
+    else 
+    {
+        afficher_boite_dialog_avec_message(feni,"Il faut remplir tout les champs obligatoires !");
     }
     
     

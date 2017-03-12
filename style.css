@@ -1,0 +1,48 @@
+GtkLabel 
+{
+    font-family: monospace;
+    font-size: 11px;
+    color: #000033;
+    border-style: solid;
+    border-color: black;
+    border-width: 2px;
+}
+
+GtkEntry 
+{
+    color: blue;
+    font-family: sans-serif;
+    font-size:12px;
+    font-style: italic;
+}
+
+GtkWindow
+{
+    background-color: #999999;
+    
+   
+}
+
+GtkButton 
+
+{
+    border-style: solid;
+    border-color: #ff3333;
+    border-width: 2px;
+    border-radius: 40px;
+    -GtkWidget-focus-line-width: 0;
+    background-image: -gtk-gradient (linear,
+	             left top,
+	             left bottom,
+	             color-stop(0.0,rgba(34,97,170,1)),
+	             color-stop(0.50,rgba(56,145,218,1)),
+	             color-stop(0.51,rgba(34,131,216,1)),
+	             color-stop(1.00,rgba(134,191,234,1)));
+
+	
+}
+
+#titre
+{
+    background-color: blue;
+}
